@@ -129,6 +129,75 @@ export default function DashboardPage() {
 
   const stats = calculateStats();
 
+  // Calculate detailed insights from entries
+  const calculateInsights = () => {
+    if (allEntries.length === 0) {
+      return { moods: [], habits: null, cycle: null };
+    }
+
+    // Mood distribution
+    const moodCounts = {};
+    const moodEmojis = {
+      energized: '⚡',
+      happy: '😊',
+      calm: '🍃',
+      anxious: '😰',
+      sad: '😢',
+      frustrated: '😤',
+      angry: '😠',
+      'self-conscious': '😳',
+      'self-doubt': '🤔',
+      relaxed: '😌',
+      apathetic: '😶',
+      numb: '😐',
+      tired: '😴'
+    };
+
+    allEntries.forEach(entry => {
+      if (entry.moods && Array.isArray(entry.moods)) {
+        entry.moods.forEach(mood => {
+          moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+        });
+      }
+    });
+
+    const totalMoods = Object.values(moodCounts).reduce((a, b) => a + b, 0);
+    const moodDistribution = Object.entries(moodCounts)
+      .map(([mood, count]) => ({
+        mood: mood.charAt(0).toUpperCase() + mood.slice(1).replace('-', ' '),
+        emoji: moodEmojis[mood] || '🌸',
+        percent: Math.round((count / totalMoods) * 100),
+        count
+      }))
+      .sort((a, b) => b.percent - a.percent)
+      .slice(0, 5);
+
+    // Habit insights
+    const waterTotal = allEntries.reduce((sum, e) => sum + (e.waterGlasses || 0), 0);
+    const sleepTotal = allEntries.reduce((sum, e) => sum + (parseFloat(e.sleepHours) || 0), 0);
+    const waterAvg = waterTotal / allEntries.length;
+    const sleepAvg = sleepTotal / allEntries.length;
+
+    const movementTypes = {};
+    allEntries.forEach(entry => {
+      if (entry.movementType && entry.movementType !== 'none') {
+        movementTypes[entry.movementType] = (movementTypes[entry.movementType] || 0) + 1;
+      }
+    });
+    const favMovement = Object.entries(movementTypes).sort((a, b) => b[1] - a[1])[0];
+
+    const habitInsights = {
+      waterAvg: waterAvg.toFixed(1),
+      sleepAvg: sleepAvg.toFixed(1),
+      favMovement: favMovement ? favMovement[0] : 'none',
+      movementDays: Object.values(movementTypes).reduce((a, b) => a + b, 0)
+    };
+
+    return { moods: moodDistribution, habits: habitInsights };
+  };
+
+  const insights = calculateInsights();
+
   // Get cycle data from latest entry
   const cycleData = latestEntry?.cyclePhase ? {
     currentDay: latestEntry.cycleDay || 0,
@@ -476,32 +545,86 @@ export default function DashboardPage() {
             </Card>
           ) : (
             <div className="space-y-4">
-              <Card>
-                <h3 className="font-serif text-xl text-deep mb-4">Mood Distribution</h3>
-                <div className="space-y-3">
-                  {[
-                    { mood: 'Calm', emoji: '🍃', percent: 35, color: 'bg-sage' },
-                    { mood: 'Happy', emoji: '😊', percent: 28, color: 'bg-rose' },
-                    { mood: 'Energized', emoji: '⚡', percent: 22, color: 'bg-mauve' },
-                  ].map((item) => (
-                    <div key={item.mood}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2 text-sm">
-                          <span>{item.emoji}</span>
-                          <span className="text-deep font-medium">{item.mood}</span>
+              {/* Mood Distribution */}
+              {insights.moods.length > 0 && (
+                <Card>
+                  <h3 className="font-serif text-xl text-deep mb-4">Mood Distribution</h3>
+                  <div className="space-y-3">
+                    {insights.moods.map((item) => (
+                      <div key={item.mood}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span>{item.emoji}</span>
+                            <span className="text-deep font-medium">{item.mood}</span>
+                          </div>
+                          <span className="text-sm text-muted">{item.percent}%</span>
                         </div>
-                        <span className="text-sm text-muted">{item.percent}%</span>
+                        <div className="h-2 bg-deep/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-rose to-mauve rounded-full transition-all"
+                            style={{ width: `${item.percent}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-deep/10 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${item.color} rounded-full transition-all`}
-                          style={{ width: `${item.percent}%` }}
-                        />
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Habit Insights */}
+              {insights.habits && (
+                <Card>
+                  <h3 className="font-serif text-xl text-deep mb-4">Habit Patterns</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-rose/5 to-mauve/5 rounded-button">
+                      <span className="text-3xl">💧</span>
+                      <div>
+                        <p className="text-sm text-muted">Daily water avg</p>
+                        <p className="text-lg font-serif text-deep">{insights.habits.waterAvg} glasses</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </Card>
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-rose/5 to-mauve/5 rounded-button">
+                      <span className="text-3xl">😴</span>
+                      <div>
+                        <p className="text-sm text-muted">Sleep avg</p>
+                        <p className="text-lg font-serif text-deep">{insights.habits.sleepAvg} hours</p>
+                      </div>
+                    </div>
+                    {insights.habits.favMovement !== 'none' && (
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-br from-rose/5 to-mauve/5 rounded-button md:col-span-2">
+                        <span className="text-3xl">🏃</span>
+                        <div>
+                          <p className="text-sm text-muted">Favorite movement</p>
+                          <p className="text-lg font-serif text-deep capitalize">
+                            {insights.habits.favMovement} • {insights.habits.movementDays} days
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              )}
+
+              {/* Journal Insight */}
+              {stats.journalCount > 0 && (
+                <Card variant="soft">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">✍️</span>
+                    <div>
+                      <p className="text-lg font-serif text-deep mb-1">
+                        You've written {stats.journalCount} journal {stats.journalCount === 1 ? 'entry' : 'entries'}
+                      </p>
+                      <p className="text-sm text-muted font-light">
+                        {stats.journalCount >= 10
+                          ? "You're building a beautiful archive of your inner world."
+                          : stats.journalCount >= 5
+                          ? "Your self-reflection practice is growing stronger."
+                          : "Keep writing to unlock deeper patterns."}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
             </div>
           )}
         </div>
