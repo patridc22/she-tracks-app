@@ -182,35 +182,72 @@ export default function CyclePage() {
     setShowSetupForm(false);
   };
 
-  // Generate calendar based on actual cycle data
-  const generateCalendar = () => {
-    const days = [];
+  // Generate month calendar with cycle data
+  const generateMonthCalendar = () => {
+    if (!cycleSetUp || !setupData.lastPeriodDate) return [];
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Get first day of month and total days in month
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const lastPeriod = new Date(setupData.lastPeriodDate);
     const cycleLength = parseInt(setupData.cycleLength) || 28;
     const periodLength = parseInt(setupData.periodLength) || 5;
 
-    for (let i = 1; i <= cycleLength; i++) {
+    const days = [];
+
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ date: null, isEmpty: true });
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      date.setHours(0, 0, 0, 0);
+
+      // Calculate days since last period for this date
+      const daysSinceLastPeriod = Math.floor((date - lastPeriod) / (1000 * 60 * 60 * 24));
+      const cycleDay = (daysSinceLastPeriod % cycleLength) + 1;
+
+      // Determine phase and styling
       let phase = '';
       let color = '';
+      let emoji = '';
 
-      if (i <= periodLength) {
-        phase = 'menstruation';
-        color = 'bg-red-200';
-      } else if (i <= 13) {
-        phase = 'follicular';
-        color = 'bg-green-200';
-      } else if (i <= 16) {
+      if (cycleDay <= periodLength && daysSinceLastPeriod >= 0) {
+        phase = 'period';
+        color = 'bg-red-100 border-red-300';
+        emoji = '🩸';
+      } else if (cycleDay >= 14 && cycleDay <= 16 && daysSinceLastPeriod >= 0) {
         phase = 'ovulation';
-        color = 'bg-rose';
-      } else {
-        phase = 'luteal';
-        color = 'bg-mauve';
+        color = 'bg-rose/20 border-rose';
+        emoji = '🌕';
       }
-      days.push({ day: i, phase, color, isCurrent: i === currentDay });
+
+      const isToday = date.toDateString() === today.toDateString();
+
+      days.push({
+        date: day,
+        cycleDay: daysSinceLastPeriod >= 0 ? cycleDay : null,
+        phase,
+        color,
+        emoji,
+        isToday,
+        isEmpty: false
+      });
     }
+
     return days;
   };
 
-  const calendarDays = generateCalendar();
+  const calendarDays = generateMonthCalendar();
 
   return (
     <div className="min-h-screen bg-cream pb-24">
@@ -431,39 +468,71 @@ export default function CyclePage() {
         {/* Calendar - Only show if cycle is set up */}
         {cycleSetUp && (
           <Card>
-            <h2 className="text-xl font-serif text-deep mb-4">{setupData.cycleLength}-Day Overview</h2>
-            <div className="grid grid-cols-7 gap-2">
-              {calendarDays.map((day) => (
-                <div
-                  key={day.day}
-                  className={`
-                    aspect-square rounded-lg flex items-center justify-center
-                    text-sm font-medium transition-all
-                    ${day.color}
-                    ${day.isCurrent ? 'ring-4 ring-deep scale-110 shadow-lg' : ''}
-                    ${day.isCurrent ? 'text-white' : 'text-deep/70'}
-                  `}
-                >
-                  {day.day}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-serif text-deep">
+                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </h2>
+              <Badge variant="neutral" className="text-[10px]">
+                Your Cycle Calendar
+              </Badge>
+            </div>
+
+            {/* Week day headers */}
+            <div className="grid grid-cols-7 gap-2 mb-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <div key={day} className="text-center text-xs font-medium text-muted py-2">
+                  {day}
                 </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-deep/10 grid grid-cols-2 gap-2 text-xs">
+
+            {/* Calendar days */}
+            <div className="grid grid-cols-7 gap-2">
+              {calendarDays.map((day, index) => (
+                <div
+                  key={index}
+                  className={`
+                    aspect-square rounded-lg flex flex-col items-center justify-center
+                    text-sm transition-all relative
+                    ${day.isEmpty ? '' : 'hover:shadow-md cursor-pointer'}
+                    ${day.color || 'bg-cream border border-deep/10'}
+                    ${day.isToday ? 'ring-2 ring-deep font-bold' : ''}
+                  `}
+                >
+                  {!day.isEmpty && (
+                    <>
+                      <span className={`${day.isToday ? 'text-deep' : 'text-deep/70'}`}>
+                        {day.date}
+                      </span>
+                      {day.emoji && (
+                        <span className="text-xs mt-0.5">{day.emoji}</span>
+                      )}
+                      {day.cycleDay && !day.emoji && (
+                        <span className="text-[9px] text-muted/60">D{day.cycleDay}</span>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Legend */}
+            <div className="mt-4 pt-4 border-t border-deep/10 grid grid-cols-2 gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-red-200" />
-                <span className="text-muted">Menstruation</span>
+                <span className="text-lg">🩸</span>
+                <span className="text-muted">Period days</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-green-200" />
-                <span className="text-muted">Follicular</span>
+                <span className="text-lg">🌕</span>
+                <span className="text-muted">Fertile window</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-rose" />
-                <span className="text-muted">Ovulation</span>
+                <div className="w-4 h-4 rounded border-2 border-deep" />
+                <span className="text-muted">Today</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-mauve" />
-                <span className="text-muted">Luteal</span>
+                <span className="text-muted text-[10px]">D1</span>
+                <span className="text-muted">Cycle day</span>
               </div>
             </div>
           </Card>
