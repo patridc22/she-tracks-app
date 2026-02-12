@@ -143,9 +143,10 @@ export default function DashboardPage() {
       <div className="bg-gradient-to-br from-[#F5EDE6] via-[#E8D5CE] to-[#D4A89F] px-6 pt-8 pb-12 mb-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-sm text-muted mb-1">{today}</p>
-          <h1 className="text-3xl font-serif text-deep mb-6">
-            Good morning, <span className="italic text-rose">{username}</span>
+          <h1 className="text-3xl font-serif text-deep mb-2">
+            Hey <span className="italic text-rose">{username}</span>, how are you doing today?
           </h1>
+          <p className="text-sm text-muted font-light">Take a moment to check in with yourself 🌸</p>
 
           {/* View Toggle */}
           <div className="flex gap-2">

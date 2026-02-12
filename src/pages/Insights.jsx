@@ -128,6 +128,19 @@ export default function InsightsPage() {
         {/* Mood Tab */}
         {activeTab === 'mood' && (
           <div className="space-y-4">
+            {!hasData ? (
+              <Card variant="soft">
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">😊</div>
+                  <h3 className="text-xl font-serif text-deep mb-3">No Mood Data Yet</h3>
+                  <p className="text-sm text-muted font-light leading-relaxed max-w-md mx-auto">
+                    Start logging your daily moods to see distribution patterns and insights.
+                    Your mood trends will appear here once you have a few entries.
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <>
             <Card>
               <h3 className="font-serif text-xl text-deep mb-4">Mood Distribution</h3>
               <div className="space-y-3">
@@ -166,12 +179,27 @@ export default function InsightsPage() {
                 most common mood is "calm", particularly during Days 6-13 of your cycle.
               </p>
             </Card>
+            </>
+            )}
           </div>
         )}
 
         {/* Wins Tab */}
         {activeTab === 'wins' && (
           <div className="space-y-4">
+            {!hasData ? (
+              <Card variant="soft">
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">🏆</div>
+                  <h3 className="text-xl font-serif text-deep mb-3">No Wins Tracked Yet</h3>
+                  <p className="text-sm text-muted font-light leading-relaxed max-w-md mx-auto">
+                    Keep tracking your daily habits and moods to build your streak and unlock achievements.
+                    Your wins and milestones will appear here!
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <>
             <Card variant="gradient">
               <div className="text-center py-4">
                 <div className="text-6xl mb-3">🔥</div>
@@ -217,6 +245,8 @@ export default function InsightsPage() {
                 </p>
               </div>
             </Card>
+            </>
+            )}
           </div>
         )}
       </div>
