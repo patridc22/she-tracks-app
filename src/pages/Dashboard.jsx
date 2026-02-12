@@ -8,7 +8,15 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [timeView, setTimeView] = useState('daily');
   const [journalEntry, setJournalEntry] = useState('');
+  const [journalSaved, setJournalSaved] = useState(false);
   const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'there';
+
+  const handleSaveJournal = async () => {
+    // Mock save - would actually save to database
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setJournalSaved(true);
+    setTimeout(() => setJournalSaved(false), 2000);
+  };
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -191,7 +199,12 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-serif text-deep">Today's Journal</h2>
             {journalEntry && (
-              <button className="text-sm text-rose font-medium">Save →</button>
+              <button
+                onClick={handleSaveJournal}
+                className="text-sm text-rose font-medium hover:underline"
+              >
+                {journalSaved ? '✓ Saved!' : 'Save →'}
+              </button>
             )}
           </div>
 

@@ -7,9 +7,16 @@ const MOODS = [
   { id: 'energized', label: 'energized', emoji: '⚡' },
   { id: 'happy', label: 'happy', emoji: '😊' },
   { id: 'calm', label: 'calm', emoji: '🍃' },
+  { id: 'relaxed', label: 'relaxed', emoji: '😌' },
   { id: 'tired', label: 'tired', emoji: '😴' },
   { id: 'anxious', label: 'anxious', emoji: '😰' },
   { id: 'sad', label: 'sad', emoji: '😢' },
+  { id: 'frustrated', label: 'frustrated', emoji: '😤' },
+  { id: 'angry', label: 'angry', emoji: '😠' },
+  { id: 'self-conscious', label: 'self-conscious', emoji: '😳' },
+  { id: 'self-doubt', label: 'self-doubt', emoji: '😔' },
+  { id: 'apathetic', label: 'apathetic', emoji: '😐' },
+  { id: 'numb', label: 'numb', emoji: '😶' },
 ];
 
 const DEFAULT_HABITS = [
@@ -25,14 +32,22 @@ export default function TrackPage() {
 
   const [formData, setFormData] = useState({
     cycleDay: '',
-    mood: '',
+    moods: [],
     energyScore: 3,
     journal: '',
     habits: {},
   });
 
   const handleMoodSelect = (moodId) => {
-    setFormData({ ...formData, mood: moodId });
+    const currentMoods = formData.moods;
+    const isSelected = currentMoods.includes(moodId);
+
+    setFormData({
+      ...formData,
+      moods: isSelected
+        ? currentMoods.filter(id => id !== moodId)
+        : [...currentMoods, moodId]
+    });
   };
 
   const toggleHabit = (habitId) => {
@@ -104,6 +119,7 @@ export default function TrackPage() {
         {/* Mood */}
         <Card>
           <h2 className="text-xl font-serif text-deep mb-4">Mood</h2>
+          <p className="text-xs text-muted mb-3">Select all that apply</p>
           <div className="grid grid-cols-3 gap-3">
             {MOODS.map((mood) => (
               <button
@@ -111,7 +127,7 @@ export default function TrackPage() {
                 type="button"
                 onClick={() => handleMoodSelect(mood.id)}
                 className={`p-4 rounded-button border-2 transition-all ${
-                  formData.mood === mood.id
+                  formData.moods.includes(mood.id)
                     ? 'border-rose bg-rose/10'
                     : 'border-deep/10 hover:border-rose/30'
                 }`}
@@ -124,7 +140,7 @@ export default function TrackPage() {
         </Card>
 
         {/* Energy Score */}
-        {formData.mood && (
+        {formData.moods.length > 0 && (
           <Card>
             <h2 className="text-xl font-serif text-deep mb-4">Energy Level</h2>
             <div className="flex items-center gap-4">
@@ -205,7 +221,7 @@ export default function TrackPage() {
         <Button
           type="submit"
           className="w-full text-base py-4"
-          disabled={!formData.cycleDay || !formData.mood || saving}
+          disabled={!formData.cycleDay || formData.moods.length === 0 || saving}
         >
           {saving ? 'Saving...' : 'Save & Generate Summary'}
         </Button>
