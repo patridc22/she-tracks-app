@@ -192,7 +192,7 @@ export default function TrackPage() {
         {formData.moods.length > 0 && (
           <Card>
             <h2 className="text-xl font-serif text-deep mb-4">Energy Level</h2>
-            <div className="flex items-center gap-4">
+            <div className="mb-4">
               <input
                 type="range"
                 min="1"
@@ -201,23 +201,45 @@ export default function TrackPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, energyScore: parseInt(e.target.value) })
                 }
-                className="flex-1 h-2 bg-deep/10 rounded-full appearance-none cursor-pointer
+                className="w-full h-3 bg-deep/10 rounded-full appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none
-                  [&::-webkit-slider-thumb]:w-6
-                  [&::-webkit-slider-thumb]:h-6
+                  [&::-webkit-slider-thumb]:w-8
+                  [&::-webkit-slider-thumb]:h-8
                   [&::-webkit-slider-thumb]:rounded-full
                   [&::-webkit-slider-thumb]:bg-gradient-to-br
                   [&::-webkit-slider-thumb]:from-rose
                   [&::-webkit-slider-thumb]:to-mauve
-                  [&::-webkit-slider-thumb]:shadow-rose-glow"
+                  [&::-webkit-slider-thumb]:shadow-rose-glow
+                  [&::-webkit-slider-thumb]:cursor-pointer
+                  [&::-moz-range-thumb]:w-8
+                  [&::-moz-range-thumb]:h-8
+                  [&::-moz-range-thumb]:rounded-full
+                  [&::-moz-range-thumb]:bg-gradient-to-br
+                  [&::-moz-range-thumb]:from-rose
+                  [&::-moz-range-thumb]:to-mauve
+                  [&::-moz-range-thumb]:border-0
+                  [&::-moz-range-thumb]:cursor-pointer"
               />
-              <div className="text-2xl font-serif text-deep w-12 text-center">
-                {formData.energyScore}
+              <div className="flex justify-between mt-2 px-1">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, energyScore: num })}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                      formData.energyScore === num
+                        ? 'bg-gradient-to-br from-rose to-mauve text-white shadow-rose-glow'
+                        : 'bg-deep/5 text-deep hover:bg-deep/10'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="flex justify-between text-xs text-muted mt-2">
-              <span>Low</span>
-              <span>High</span>
+            <div className="flex justify-between text-xs text-muted px-1">
+              <span>🔋 Low</span>
+              <span>⚡ High</span>
             </div>
           </Card>
         )}
