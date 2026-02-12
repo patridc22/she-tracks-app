@@ -56,6 +56,7 @@ export default function TrackPage() {
   ];
 
   const MOVEMENT_TYPES = [
+    { id: 'none', label: 'None', emoji: '🛋️' },
     { id: 'yoga', label: 'Yoga', emoji: '🧘' },
     { id: 'running', label: 'Running', emoji: '🏃' },
     { id: 'walking', label: 'Walking', emoji: '🚶' },
@@ -92,7 +93,24 @@ export default function TrackPage() {
     e.preventDefault();
     setSaving(true);
 
-    // Mock save - would actually save to database and generate AI summary
+    // Save to localStorage
+    const today = new Date().toISOString().split('T')[0];
+    const savedData = {
+      ...formData,
+      date: today,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Get existing entries
+    const existingEntries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
+
+    // Remove any existing entry for today and add new one
+    const updatedEntries = existingEntries.filter(entry => entry.date !== today);
+    updatedEntries.push(savedData);
+
+    localStorage.setItem('trackingEntries', JSON.stringify(updatedEntries));
+    localStorage.setItem('latestEntry', JSON.stringify(savedData));
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setSaving(false);

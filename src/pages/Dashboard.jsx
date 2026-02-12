@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, Badge, Button } from '@/components/ui';
@@ -9,35 +9,111 @@ export default function DashboardPage() {
   const [timeView, setTimeView] = useState('daily');
   const [journalEntry, setJournalEntry] = useState('');
   const [journalSaved, setJournalSaved] = useState(false);
+  const [latestEntry, setLatestEntry] = useState(null);
+  const [allEntries, setAllEntries] = useState([]);
+
   const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'there';
 
   const handleSaveJournal = async () => {
-    // Mock save - would actually save to database
+    // Save journal to localStorage
+    const today = new Date().toISOString().split('T')[0];
+    const updatedEntry = { ...latestEntry, journal: journalEntry, date: today };
+    localStorage.setItem('latestEntry', JSON.stringify(updatedEntry));
+
     await new Promise((resolve) => setTimeout(resolve, 500));
     setJournalSaved(true);
     setTimeout(() => setJournalSaved(false), 2000);
   };
+
+  useEffect(() => {
+    // Load data from localStorage
+    const latest = JSON.parse(localStorage.getItem('latestEntry') || 'null');
+    const entries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
+    setLatestEntry(latest);
+    setAllEntries(entries);
+    if (latest?.journal) {
+      setJournalEntry(latest.journal);
+    }
+  }, []);
+
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   });
 
-  // New user default state - all zeros
-  const stats = {
-    streak: 0,
-    moodPositive: 0,
-    habitsCompleted: 0,
-    journalCount: 0,
+  // Calculate stats from entries
+  const calculateStats = () => {
+    if (allEntries.length === 0) {
+      return { streak: 0, moodPositive: 0, habitsCompleted: 0, journalCount: 0 };
+    }
+
+    // Calculate streak
+    const sortedEntries = [...allEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+    let streak = 0;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    for (const entry of sortedEntries) {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      const dayDiff = Math.floor((currentDate - entryDate) / (1000 * 60 * 60 * 24));
+
+      if (dayDiff === streak) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    // Calculate positive mood percentage
+    const positiveMoods = ['happy', 'calm', 'energized', 'relaxed'];
+    const moodEntries = allEntries.filter(e => e.moods && e.moods.length > 0);
+    const positiveCount = moodEntries.filter(e =>
+      e.moods.some(mood => positiveMoods.includes(mood))
+    ).length;
+    const moodPositive = moodEntries.length > 0
+      ? Math.round((positiveCount / moodEntries.length) * 100)
+      : 0;
+
+    // Calculate habits completed
+    const entriesWithHabits = allEntries.filter(e =>
+      e.waterGlasses > 0 || e.sleepHours > 0 || e.movementType || e.meals > 0
+    );
+    const habitsCompleted = allEntries.length > 0
+      ? Math.round((entriesWithHabits.length / allEntries.length) * 100)
+      : 0;
+
+    // Count journal entries
+    const journalCount = allEntries.filter(e => e.journal && e.journal.trim().length > 0).length;
+
+    return { streak, moodPositive, habitsCompleted, journalCount };
   };
 
-  // Empty cycle state for new users
-  const cycleData = {
+  const stats = calculateStats();
+
+  // Get cycle data from latest entry
+  const cycleData = latestEntry?.cyclePhase ? {
+    currentDay: latestEntry.cycleDay || 0,
+    totalDays: 28,
+    phase: latestEntry.cyclePhase.charAt(0).toUpperCase() + latestEntry.cyclePhase.slice(1),
+    phaseEmoji: getPhaseEmoji(latestEntry.cyclePhase),
+  } : {
     currentDay: 0,
     totalDays: 28,
     phase: 'Not set',
     phaseEmoji: '🌸',
   };
+
+  function getPhaseEmoji(phase) {
+    const emojis = {
+      menstruation: '🩸',
+      follicular: '🌱',
+      ovulation: '🌕',
+      luteal: '🍂',
+    };
+    return emojis[phase] || '🌸';
+  }
 
   return (
     <div className="min-h-screen bg-cream pb-24">
