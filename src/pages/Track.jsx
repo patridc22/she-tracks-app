@@ -32,12 +32,20 @@ export default function TrackPage() {
 
   const [formData, setFormData] = useState({
     cycleDay: '',
+    cyclePhase: '',
     moods: [],
     energyScore: 3,
     journal: '',
     habits: {},
     waterGlasses: 0,
   });
+
+  const CYCLE_PHASES = [
+    { id: 'menstruation', label: 'Menstruation', emoji: '🩸' },
+    { id: 'follicular', label: 'Follicular', emoji: '🌱' },
+    { id: 'ovulation', label: 'Ovulation', emoji: '🌕' },
+    { id: 'luteal', label: 'Luteal', emoji: '🍂' },
+  ];
 
   const handleMoodSelect = (moodId) => {
     const currentMoods = formData.moods;
@@ -100,21 +108,43 @@ export default function TrackPage() {
       </div>
 
       <form onSubmit={handleSave} className="max-w-2xl mx-auto px-6 py-6 space-y-6">
-        {/* Cycle Day */}
+        {/* Cycle Phase */}
         <Card>
-          <h2 className="text-xl font-serif text-deep mb-4">Cycle Day</h2>
-          <Input
-            type="number"
-            min="1"
-            max="60"
-            value={formData.cycleDay}
-            onChange={(e) => setFormData({ ...formData, cycleDay: e.target.value })}
-            placeholder="Enter day of cycle (e.g. 14)"
-            required
-          />
-          <p className="text-xs text-muted mt-2">
-            Day 1 is the first day of your period. If you're not sure, make your best guess.
-          </p>
+          <h2 className="text-xl font-serif text-deep mb-4">Where are you in your cycle?</h2>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {CYCLE_PHASES.map((phase) => (
+              <button
+                key={phase.id}
+                type="button"
+                onClick={() => setFormData({ ...formData, cyclePhase: phase.id })}
+                className={`p-4 rounded-button border-2 transition-all ${
+                  formData.cyclePhase === phase.id
+                    ? 'border-mauve bg-mauve/10'
+                    : 'border-deep/10 hover:border-mauve/30'
+                }`}
+              >
+                <div className="text-3xl mb-2">{phase.emoji}</div>
+                <div className="text-xs font-medium text-deep">{phase.label}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-deep/10">
+            <label className="text-sm font-medium text-deep mb-2 block">
+              Cycle Day (Optional)
+            </label>
+            <Input
+              type="number"
+              min="1"
+              max="60"
+              value={formData.cycleDay}
+              onChange={(e) => setFormData({ ...formData, cycleDay: e.target.value })}
+              placeholder="e.g. 14"
+            />
+            <p className="text-xs text-muted mt-2">
+              Day 1 is the first day of your period.
+            </p>
+          </div>
         </Card>
 
         {/* Mood */}
@@ -269,7 +299,7 @@ export default function TrackPage() {
         <Button
           type="submit"
           className="w-full text-base py-4"
-          disabled={!formData.cycleDay || formData.moods.length === 0 || saving}
+          disabled={formData.moods.length === 0 || saving}
         >
           {saving ? 'Saving...' : 'Save & Generate Summary'}
         </Button>
