@@ -36,6 +36,7 @@ export default function TrackPage() {
     energyScore: 3,
     journal: '',
     habits: {},
+    waterGlasses: 0,
   });
 
   const handleMoodSelect = (moodId) => {
@@ -183,22 +184,69 @@ export default function TrackPage() {
           </div>
           <div className="space-y-3">
             {DEFAULT_HABITS.map((habit) => (
-              <button
-                key={habit.id}
-                type="button"
-                onClick={() => toggleHabit(habit.id)}
-                className={`w-full flex items-center justify-between p-4 rounded-button border-2 transition-all ${
-                  formData.habits[habit.id]
-                    ? 'border-sage bg-sage/10'
-                    : 'border-deep/10 hover:border-sage/30'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{habit.emoji}</span>
-                  <span className="text-sm font-medium text-deep">{habit.label}</span>
-                </div>
-                {formData.habits[habit.id] && <span className="text-sage text-xl">✓</span>}
-              </button>
+              <div key={habit.id}>
+                {habit.id === 'water' ? (
+                  <div className="p-4 rounded-button border-2 border-deep/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{habit.emoji}</span>
+                        <span className="text-sm font-medium text-deep">{habit.label}</span>
+                      </div>
+                      {formData.waterGlasses > 0 && (
+                        <span className="text-sage text-xl">✓</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            waterGlasses: Math.max(0, formData.waterGlasses - 1),
+                          })
+                        }
+                        className="w-10 h-10 rounded-full bg-deep/10 hover:bg-deep/20 flex items-center justify-center text-deep font-bold"
+                      >
+                        −
+                      </button>
+                      <div className="flex-1 text-center">
+                        <div className="text-2xl font-serif text-deep">
+                          {formData.waterGlasses}
+                        </div>
+                        <div className="text-xs text-muted">glasses (250ml)</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            waterGlasses: formData.waterGlasses + 1,
+                          })
+                        }
+                        className="w-10 h-10 rounded-full bg-sage/20 hover:bg-sage/30 flex items-center justify-center text-sage font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => toggleHabit(habit.id)}
+                    className={`w-full flex items-center justify-between p-4 rounded-button border-2 transition-all ${
+                      formData.habits[habit.id]
+                        ? 'border-sage bg-sage/10'
+                        : 'border-deep/10 hover:border-sage/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{habit.emoji}</span>
+                      <span className="text-sm font-medium text-deep">{habit.label}</span>
+                    </div>
+                    {formData.habits[habit.id] && <span className="text-sage text-xl">✓</span>}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </Card>
