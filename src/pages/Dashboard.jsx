@@ -5,6 +5,21 @@ import { Card, Badge, Button } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
 import { trackingService } from '@/services/trackingService';
 
+const DAILY_AFFIRMATIONS = [
+  "You are exactly where you need to be 🌸",
+  "Your feelings are valid and deserve attention",
+  "You're doing better than you think",
+  "Rest is productive, not lazy",
+  "You deserve the same compassion you give others",
+  "Your worth isn't measured by your productivity",
+  "It's okay to prioritize yourself today",
+];
+
+function getDailyAffirmation() {
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  return DAILY_AFFIRMATIONS[dayOfYear % DAILY_AFFIRMATIONS.length];
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [timeView, setTimeView] = useState('daily');
@@ -297,14 +312,12 @@ export default function DashboardPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-serif text-deep">Today's Journal</h2>
-            {journalEntry && (
-              <button
-                onClick={handleSaveJournal}
-                className="text-sm text-rose font-medium hover:underline"
-              >
-                {journalSaved ? '✓ Saved!' : 'Save →'}
-              </button>
-            )}
+            <button
+              onClick={handleSaveJournal}
+              className="text-sm text-rose font-medium hover:underline"
+            >
+              {journalSaved ? '✓ Saved!' : 'Save →'}
+            </button>
           </div>
 
           <textarea
@@ -332,19 +345,79 @@ export default function DashboardPage() {
             </Card>
           </Link>
 
-          <Link to="/insights">
+          <Link to="/track">
             <Card className="hover:shadow-lg transition-all cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-mauve/10 flex items-center justify-center text-2xl">
                   ✨
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-deep">View Insights</h3>
-                  <p className="text-xs text-muted">Patterns & trends</p>
+                  <h3 className="font-serif text-lg text-deep">Glow Up</h3>
+                  <p className="text-xs text-muted">Affirmations & meditations</p>
                 </div>
               </div>
             </Card>
           </Link>
+        </div>
+
+        {/* Daily Affirmation */}
+        <Card variant="gradient" className="mt-6">
+          <div className="text-center py-4">
+            <div className="text-4xl mb-3">✨</div>
+            <p className="text-xl font-serif text-white mb-2">Today's Affirmation</p>
+            <p className="text-white/95 font-light leading-relaxed text-lg">
+              {getDailyAffirmation()}
+            </p>
+          </div>
+        </Card>
+
+        {/* Insights Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-serif text-deep mb-4">
+            Your <span className="italic text-rose">Insights</span>
+          </h2>
+
+          {allEntries.length === 0 ? (
+            <Card variant="soft">
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">📊</div>
+                <h3 className="text-xl font-serif text-deep mb-3">No Insights Yet</h3>
+                <p className="text-sm text-muted font-light leading-relaxed max-w-md mx-auto">
+                  Start tracking your daily moods, habits, and cycle to unlock AI-powered insights.
+                  Patterns will appear after a few days of consistent logging.
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <Card>
+                <h3 className="font-serif text-xl text-deep mb-4">Mood Distribution</h3>
+                <div className="space-y-3">
+                  {[
+                    { mood: 'Calm', emoji: '🍃', percent: 35, color: 'bg-sage' },
+                    { mood: 'Happy', emoji: '😊', percent: 28, color: 'bg-rose' },
+                    { mood: 'Energized', emoji: '⚡', percent: 22, color: 'bg-mauve' },
+                  ].map((item) => (
+                    <div key={item.mood}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span>{item.emoji}</span>
+                          <span className="text-deep font-medium">{item.mood}</span>
+                        </div>
+                        <span className="text-sm text-muted">{item.percent}%</span>
+                      </div>
+                      <div className="h-2 bg-deep/10 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${item.color} rounded-full transition-all`}
+                          style={{ width: `${item.percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 

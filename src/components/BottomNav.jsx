@@ -4,7 +4,7 @@ const navItems = [
   { path: '/dashboard', icon: '🏠', label: 'Home', key: 'home' },
   { path: '/track', icon: '📝', label: 'Track', key: 'track' },
   { path: '/cycle', icon: '🌙', label: 'Cycle', key: 'cycle' },
-  { path: '/insights', icon: '✨', label: 'Insights', key: 'insights' },
+  { path: '/insights', icon: '✨', label: 'Glow Up', key: 'glowup' },
   { path: '/me', icon: '👤', label: 'Me', key: 'me' },
 ];
 

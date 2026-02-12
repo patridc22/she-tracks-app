@@ -17,7 +17,7 @@ import OnboardingPlanPage from './pages/onboarding/Plan';
 import DashboardPage from './pages/Dashboard';
 import TrackPage from './pages/Track';
 import CyclePage from './pages/Cycle';
-import InsightsPage from './pages/Insights';
+import GlowUpPage from './pages/GlowUp';
 import MePage from './pages/Me';
 
 export default function App() {
@@ -78,7 +78,7 @@ export default function App() {
           path="/insights"
           element={
             <ProtectedRoute>
-              <InsightsPage />
+              <GlowUpPage />
             </ProtectedRoute>
           }
         />
