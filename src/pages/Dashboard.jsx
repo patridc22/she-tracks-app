@@ -7,6 +7,7 @@ import BottomNav from '@/components/BottomNav';
 export default function DashboardPage() {
   const { user } = useAuth();
   const [timeView, setTimeView] = useState('daily');
+  const [journalEntry, setJournalEntry] = useState('');
   const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'there';
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -189,17 +190,18 @@ export default function DashboardPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-serif text-deep">Today's Journal</h2>
-            <Link to="/track">
-              <button className="text-sm text-rose font-medium">Add entry →</button>
-            </Link>
+            {journalEntry && (
+              <button className="text-sm text-rose font-medium">Save →</button>
+            )}
           </div>
 
-          <div className="bg-cream rounded-lg p-4 border border-dashed border-deep/20 text-center">
-            <div className="text-3xl mb-2">✍️</div>
-            <p className="text-sm text-muted font-light">
-              No journal entry yet today. Tap above to log your mood and reflections.
-            </p>
-          </div>
+          <textarea
+            value={journalEntry}
+            onChange={(e) => setJournalEntry(e.target.value)}
+            placeholder="How are you feeling today? What's on your mind?..."
+            className="w-full min-h-[120px] bg-cream rounded-lg p-4 border border-deep/20 text-deep placeholder:text-muted font-light leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-rose/50 focus:border-rose"
+            rows={5}
+          />
         </Card>
 
         {/* Quick Actions */}
