@@ -117,16 +117,20 @@ export default function CyclePage() {
 
       <div className="max-w-2xl mx-auto px-6 py-6 space-y-6">
         {/* Setup Form or Current Phase */}
-        {!cycleSetUp ? (
+        {!cycleSetUp || showSetupForm ? (
           <Card variant="gradient">
             <div className="text-center py-4">
               <div className="text-6xl mb-4">🌸</div>
-              <h2 className="text-2xl font-serif text-white mb-3">Set Up Your Cycle Tracking</h2>
+              <h2 className="text-2xl font-serif text-white mb-3">
+                {cycleSetUp ? 'Edit Your Cycle Settings' : 'Set Up Your Cycle Tracking'}
+              </h2>
               <p className="text-white/90 font-light mb-6">
-                Enter your last period date to start tracking your cycle and unlock personalized
-                insights.
+                {cycleSetUp
+                  ? 'Update your cycle information to keep your tracking accurate.'
+                  : 'Enter your last period date to start tracking your cycle and unlock personalized insights.'
+                }
               </p>
-              {!showSetupForm ? (
+              {!showSetupForm && !cycleSetUp ? (
                 <Button
                   onClick={() => setShowSetupForm(true)}
                   className="bg-white text-rose hover:bg-white/90"
@@ -185,9 +189,20 @@ export default function CyclePage() {
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full bg-white text-rose hover:bg-white/90">
-                    Start Tracking
-                  </Button>
+                  <div className="flex gap-3">
+                    {cycleSetUp && (
+                      <Button
+                        type="button"
+                        onClick={() => setShowSetupForm(false)}
+                        className="flex-1 bg-white/20 text-white hover:bg-white/30"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    <Button type="submit" className={`${cycleSetUp ? 'flex-1' : 'w-full'} bg-white text-rose hover:bg-white/90`}>
+                      {cycleSetUp ? 'Save Changes' : 'Start Tracking'}
+                    </Button>
+                  </div>
                 </form>
               )}
             </div>
@@ -293,8 +308,8 @@ export default function CyclePage() {
           ))}
         </div>
 
-        {/* Cycle Settings - Only show if set up */}
-        {cycleSetUp && (
+        {/* Cycle Settings - Only show if set up and not editing */}
+        {cycleSetUp && !showSetupForm && (
           <Card variant="soft">
             <div className="flex items-center justify-between">
               <div>
@@ -303,7 +318,12 @@ export default function CyclePage() {
                   Length: {setupData.cycleLength} days • Period: {setupData.periodLength} days
                 </p>
               </div>
-              <button className="text-sm text-rose font-medium">Edit →</button>
+              <button
+                onClick={() => setShowSetupForm(true)}
+                className="text-sm text-rose font-medium hover:underline"
+              >
+                Edit →
+              </button>
             </div>
           </Card>
         )}
