@@ -36,8 +36,15 @@ export default function TrackPage() {
     moods: [],
     energyScore: 3,
     journal: '',
+    proudOf: '',
+    gratefulFor: '',
+    manifestation: '',
     habits: {},
     waterGlasses: 0,
+    sleepHours: 0,
+    movementType: '',
+    meals: 0,
+    snacks: 0,
   });
 
   const CYCLE_PHASES = [
@@ -45,6 +52,17 @@ export default function TrackPage() {
     { id: 'follicular', label: 'Follicular', emoji: '🌱' },
     { id: 'ovulation', label: 'Ovulation', emoji: '🌕' },
     { id: 'luteal', label: 'Luteal', emoji: '🍂' },
+  ];
+
+  const MOVEMENT_TYPES = [
+    { id: 'yoga', label: 'Yoga', emoji: '🧘' },
+    { id: 'running', label: 'Running', emoji: '🏃' },
+    { id: 'walking', label: 'Walking', emoji: '🚶' },
+    { id: 'gym', label: 'Gym', emoji: '🏋️' },
+    { id: 'dance', label: 'Dance', emoji: '💃' },
+    { id: 'cycling', label: 'Cycling', emoji: '🚴' },
+    { id: 'swimming', label: 'Swimming', emoji: '🏊' },
+    { id: 'other', label: 'Other', emoji: '✨' },
   ];
 
   const handleMoodSelect = (moodId) => {
@@ -259,6 +277,162 @@ export default function TrackPage() {
                       </button>
                     </div>
                   </div>
+                ) : habit.id === 'sleep' ? (
+                  <div className="p-4 rounded-button border-2 border-deep/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{habit.emoji}</span>
+                        <span className="text-sm font-medium text-deep">{habit.label}</span>
+                      </div>
+                      {formData.sleepHours > 0 && (
+                        <span className="text-sage text-xl">✓</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            sleepHours: Math.max(0, formData.sleepHours - 0.5),
+                          })
+                        }
+                        className="w-10 h-10 rounded-full bg-deep/10 hover:bg-deep/20 flex items-center justify-center text-deep font-bold"
+                      >
+                        −
+                      </button>
+                      <div className="flex-1 text-center">
+                        <div className="text-2xl font-serif text-deep">
+                          {formData.sleepHours}
+                        </div>
+                        <div className="text-xs text-muted">hours</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            sleepHours: formData.sleepHours + 0.5,
+                          })
+                        }
+                        className="w-10 h-10 rounded-full bg-sage/20 hover:bg-sage/30 flex items-center justify-center text-sage font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : habit.id === 'movement' ? (
+                  <div className="p-4 rounded-button border-2 border-deep/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{habit.emoji}</span>
+                        <span className="text-sm font-medium text-deep">{habit.label}</span>
+                      </div>
+                      {formData.movementType && (
+                        <span className="text-sage text-xl">✓</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {MOVEMENT_TYPES.map((type) => (
+                        <button
+                          key={type.id}
+                          type="button"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              movementType: formData.movementType === type.id ? '' : type.id,
+                            })
+                          }
+                          className={`p-2 rounded-button border-2 transition-all ${
+                            formData.movementType === type.id
+                              ? 'border-sage bg-sage/10'
+                              : 'border-deep/10 hover:border-sage/30'
+                          }`}
+                        >
+                          <div className="text-2xl mb-1">{type.emoji}</div>
+                          <div className="text-[10px] font-medium text-deep">{type.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : habit.id === 'meals' ? (
+                  <div className="p-4 rounded-button border-2 border-deep/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{habit.emoji}</span>
+                        <span className="text-sm font-medium text-deep">{habit.label}</span>
+                      </div>
+                      {(formData.meals > 0 || formData.snacks > 0) && (
+                        <span className="text-sage text-xl">✓</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-muted mb-2 text-center">Meals</div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData({
+                                ...formData,
+                                meals: Math.max(0, formData.meals - 1),
+                              })
+                            }
+                            className="w-8 h-8 rounded-full bg-deep/10 hover:bg-deep/20 flex items-center justify-center text-deep font-bold text-sm"
+                          >
+                            −
+                          </button>
+                          <div className="flex-1 text-center text-xl font-serif text-deep">
+                            {formData.meals}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData({
+                                ...formData,
+                                meals: formData.meals + 1,
+                              })
+                            }
+                            className="w-8 h-8 rounded-full bg-sage/20 hover:bg-sage/30 flex items-center justify-center text-sage font-bold text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted mb-2 text-center">Snacks</div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData({
+                                ...formData,
+                                snacks: Math.max(0, formData.snacks - 1),
+                              })
+                            }
+                            className="w-8 h-8 rounded-full bg-deep/10 hover:bg-deep/20 flex items-center justify-center text-deep font-bold text-sm"
+                          >
+                            −
+                          </button>
+                          <div className="flex-1 text-center text-xl font-serif text-deep">
+                            {formData.snacks}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData({
+                                ...formData,
+                                snacks: formData.snacks + 1,
+                              })
+                            }
+                            className="w-8 h-8 rounded-full bg-sage/20 hover:bg-sage/30 flex items-center justify-center text-sage font-bold text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -293,6 +467,49 @@ export default function TrackPage() {
           <p className="text-xs text-muted mt-2">
             Your words help the AI personalize your summaries. Everything is private.
           </p>
+        </Card>
+
+        {/* Reflections */}
+        <Card variant="soft">
+          <h2 className="text-xl font-serif text-deep mb-4">✨ Reflections</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-deep mb-2 block">
+                What I'm proud of myself for today
+              </label>
+              <Textarea
+                value={formData.proudOf}
+                onChange={(e) => setFormData({ ...formData, proudOf: e.target.value })}
+                placeholder="Celebrate your wins, big or small..."
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-deep mb-2 block">
+                What I'm grateful for today
+              </label>
+              <Textarea
+                value={formData.gratefulFor}
+                onChange={(e) => setFormData({ ...formData, gratefulFor: e.target.value })}
+                placeholder="What brought you joy or peace today?"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-deep mb-2 block">
+                ✨ What I want to manifest/create/attract next
+              </label>
+              <Textarea
+                value={formData.manifestation}
+                onChange={(e) => setFormData({ ...formData, manifestation: e.target.value })}
+                placeholder="Set your intentions and dreams..."
+                rows={3}
+              />
+            </div>
+          </div>
         </Card>
 
         {/* Save Button */}
