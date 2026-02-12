@@ -29,6 +29,7 @@ const DEFAULT_HABITS = [
 export default function TrackPage() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     cycleDay: '',
@@ -95,14 +96,34 @@ export default function TrackPage() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setSaving(false);
-    navigate('/dashboard');
+    setShowSuccess(true);
+
+    // Show success animation for 2 seconds then navigate
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 2000);
   };
 
   const habitsCompleted = Object.values(formData.habits).filter(Boolean).length;
   const habitsTotal = DEFAULT_HABITS.length;
 
   return (
-    <div className="min-h-screen bg-cream pb-24">
+    <div className="min-h-screen bg-cream pb-24 relative">
+      {/* Success Sparkle Overlay */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-deep/20 backdrop-blur-sm animate-fadeIn">
+          <div className="text-center animate-scaleIn">
+            <div className="text-8xl mb-4 animate-bounce">✨</div>
+            <h2 className="text-3xl font-serif text-deep mb-2">Amazing!</h2>
+            <p className="text-lg text-muted">Your day has been saved</p>
+            <div className="flex gap-4 justify-center mt-4 text-4xl">
+              <span className="animate-pulse">🌸</span>
+              <span className="animate-pulse delay-100">✨</span>
+              <span className="animate-pulse delay-200">💫</span>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-gradient-to-br from-[#F5EDE6] via-[#E8D5CE] to-[#D4A89F] px-6 pt-8 pb-8">
         <div className="max-w-2xl mx-auto">
