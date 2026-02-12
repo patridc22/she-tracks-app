@@ -345,7 +345,7 @@ export default function DashboardPage() {
             </Card>
           </Link>
 
-          <Link to="/track">
+          <Link to="/insights">
             <Card className="hover:shadow-lg transition-all cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-mauve/10 flex items-center justify-center text-2xl">
