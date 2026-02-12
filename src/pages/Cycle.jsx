@@ -1,4 +1,5 @@
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { Card, Badge, Button, Input } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
 
 const PHASES = [
@@ -33,9 +34,24 @@ const PHASES = [
 ];
 
 export default function CyclePage() {
-  const currentDay = 14;
-  const currentPhase = 'Ovulation';
-  const nextPeriod = 'Feb 26';
+  // Track if user has set up their cycle
+  const [cycleSetUp, setCycleSetUp] = useState(false);
+  const [showSetupForm, setShowSetupForm] = useState(false);
+  const [setupData, setSetupData] = useState({
+    lastPeriodDate: '',
+    cycleLength: 28,
+    periodLength: 5,
+  });
+
+  const currentDay = cycleSetUp ? 14 : 0;
+  const currentPhase = cycleSetUp ? 'Ovulation' : null;
+  const nextPeriod = cycleSetUp ? 'Feb 26' : null;
+
+  const handleSetupSubmit = (e) => {
+    e.preventDefault();
+    setCycleSetUp(true);
+    setShowSetupForm(false);
+  };
 
   // Mock calendar data
   const generateCalendar = () => {
@@ -76,71 +92,139 @@ export default function CyclePage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-6 space-y-6">
-        {/* Current Phase */}
-        <Card variant="gradient">
-          <Badge variant="ai" className="mb-3">
-            ✦ CURRENT PHASE
-          </Badge>
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-5xl">🌕</span>
-            <div>
-              <h2 className="text-2xl font-serif text-white mb-1">{currentPhase}</h2>
-              <p className="text-white/90 text-sm">Day {currentDay} of 28</p>
+        {/* Setup Form or Current Phase */}
+        {!cycleSetUp ? (
+          <Card variant="gradient">
+            <div className="text-center py-4">
+              <div className="text-6xl mb-4">🌸</div>
+              <h2 className="text-2xl font-serif text-white mb-3">Set Up Your Cycle Tracking</h2>
+              <p className="text-white/90 font-light mb-6">
+                Enter your last period date to start tracking your cycle and unlock personalized
+                insights.
+              </p>
+              {!showSetupForm ? (
+                <Button
+                  onClick={() => setShowSetupForm(true)}
+                  className="bg-white text-rose hover:bg-white/90"
+                >
+                  Get Started →
+                </Button>
+              ) : (
+                <form onSubmit={handleSetupSubmit} className="space-y-4 text-left mt-6">
+                  <Input
+                    label="When did your last period start?"
+                    type="date"
+                    value={setupData.lastPeriodDate}
+                    onChange={(e) =>
+                      setSetupData({ ...setupData, lastPeriodDate: e.target.value })
+                    }
+                    required
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Cycle length (days)"
+                      type="number"
+                      value={setupData.cycleLength}
+                      onChange={(e) =>
+                        setSetupData({ ...setupData, cycleLength: e.target.value })
+                      }
+                      min="21"
+                      max="35"
+                      required
+                      className="bg-white/10 border-white/20 text-white"
+                    />
+                    <Input
+                      label="Period length (days)"
+                      type="number"
+                      value={setupData.periodLength}
+                      onChange={(e) =>
+                        setSetupData({ ...setupData, periodLength: e.target.value })
+                      }
+                      min="3"
+                      max="7"
+                      required
+                      className="bg-white/10 border-white/20 text-white"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-white text-rose hover:bg-white/90">
+                    Start Tracking
+                  </Button>
+                </form>
+              )}
             </div>
-          </div>
-          <p className="text-white/95 font-light leading-relaxed">
-            Peak energy and social connection. This is your power phase — great for important
-            conversations, presentations, and creative projects.
-          </p>
-          <div className="mt-4 pt-4 border-t border-white/20 text-sm text-white/90">
-            Next period predicted: <strong>{nextPeriod}</strong>
-          </div>
-        </Card>
-
-        {/* 28-Day Calendar */}
-        <Card>
-          <h2 className="text-xl font-serif text-deep mb-4">28-Day Overview</h2>
-          <div className="grid grid-cols-7 gap-2">
-            {calendarDays.map((day) => (
-              <div
-                key={day.day}
-                className={`
-                  aspect-square rounded-lg flex items-center justify-center
-                  text-sm font-medium transition-all
-                  ${day.color}
-                  ${day.isCurrent ? 'ring-4 ring-deep scale-110 shadow-lg' : ''}
-                  ${day.isCurrent ? 'text-white' : 'text-deep/70'}
-                `}
-              >
-                {day.day}
+          </Card>
+        ) : (
+          <Card variant="gradient">
+            <Badge variant="ai" className="mb-3">
+              ✦ CURRENT PHASE
+            </Badge>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-5xl">🌕</span>
+              <div>
+                <h2 className="text-2xl font-serif text-white mb-1">{currentPhase}</h2>
+                <p className="text-white/90 text-sm">Day {currentDay} of 28</p>
               </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-4 border-t border-deep/10 grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-red-200" />
-              <span className="text-muted">Menstruation</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-green-200" />
-              <span className="text-muted">Follicular</span>
+            <p className="text-white/95 font-light leading-relaxed">
+              Peak energy and social connection. This is your power phase — great for important
+              conversations, presentations, and creative projects.
+            </p>
+            <div className="mt-4 pt-4 border-t border-white/20 text-sm text-white/90">
+              Next period predicted: <strong>{nextPeriod}</strong>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-rose" />
-              <span className="text-muted">Ovulation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-mauve" />
-              <span className="text-muted">Luteal</span>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
-        {/* All Phases Accordion */}
+        {/* 28-Day Calendar - Only show if cycle is set up */}
+        {cycleSetUp && (
+          <Card>
+            <h2 className="text-xl font-serif text-deep mb-4">28-Day Overview</h2>
+            <div className="grid grid-cols-7 gap-2">
+              {calendarDays.map((day) => (
+                <div
+                  key={day.day}
+                  className={`
+                    aspect-square rounded-lg flex items-center justify-center
+                    text-sm font-medium transition-all
+                    ${day.color}
+                    ${day.isCurrent ? 'ring-4 ring-deep scale-110 shadow-lg' : ''}
+                    ${day.isCurrent ? 'text-white' : 'text-deep/70'}
+                  `}
+                >
+                  {day.day}
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-deep/10 grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-red-200" />
+                <span className="text-muted">Menstruation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-green-200" />
+                <span className="text-muted">Follicular</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-rose" />
+                <span className="text-muted">Ovulation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-mauve" />
+                <span className="text-muted">Luteal</span>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* All Phases Info - Always visible */}
         <div className="space-y-3">
-          <h2 className="text-xl font-serif text-deep">All Phases</h2>
+          <h2 className="text-xl font-serif text-deep">Understanding Your Phases</h2>
           {PHASES.map((phase) => (
-            <Card key={phase.name} variant={phase.name === currentPhase ? 'bordered' : 'soft'}>
+            <Card
+              key={phase.name}
+              variant={cycleSetUp && phase.name === currentPhase ? 'bordered' : 'soft'}
+            >
               <div className="flex items-start gap-3">
                 <span className="text-3xl">{phase.emoji}</span>
                 <div className="flex-1">
@@ -157,16 +241,20 @@ export default function CyclePage() {
           ))}
         </div>
 
-        {/* Cycle Settings */}
-        <Card variant="soft">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif text-lg text-deep mb-1">Cycle Settings</h3>
-              <p className="text-xs text-muted">Length: 28 days • Period: 5 days</p>
+        {/* Cycle Settings - Only show if set up */}
+        {cycleSetUp && (
+          <Card variant="soft">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-lg text-deep mb-1">Cycle Settings</h3>
+                <p className="text-xs text-muted">
+                  Length: {setupData.cycleLength} days • Period: {setupData.periodLength} days
+                </p>
+              </div>
+              <button className="text-sm text-rose font-medium">Edit →</button>
             </div>
-            <button className="text-sm text-rose font-medium">Edit →</button>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
 
       <BottomNav active="cycle" />
