@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, Badge, Button } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
+import { trackingService } from '@/services/trackingService';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -26,15 +27,36 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // Load data from localStorage
-    const latest = JSON.parse(localStorage.getItem('latestEntry') || 'null');
-    const entries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
-    setLatestEntry(latest);
-    setAllEntries(entries);
-    if (latest?.journal) {
-      setJournalEntry(latest.journal);
+    async function loadData() {
+      if (!user) return;
+
+      try {
+        // Try to load from Supabase first
+        const [latest, entries] = await Promise.all([
+          trackingService.getLatestEntry(user.id),
+          trackingService.getUserEntries(user.id, 30)
+        ]);
+
+        setLatestEntry(latest);
+        setAllEntries(entries);
+        if (latest?.journal) {
+          setJournalEntry(latest.journal);
+        }
+      } catch (error) {
+        console.error('Error loading from Supabase, falling back to localStorage:', error);
+        // Fallback to localStorage
+        const latest = JSON.parse(localStorage.getItem('latestEntry') || 'null');
+        const entries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
+        setLatestEntry(latest);
+        setAllEntries(entries);
+        if (latest?.journal) {
+          setJournalEntry(latest.journal);
+        }
+      }
     }
-  }, []);
+
+    loadData();
+  }, [user]);
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',

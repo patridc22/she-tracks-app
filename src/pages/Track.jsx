@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { Button, Card, Input, Textarea, Badge } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
+import { trackingService } from '@/services/trackingService';
 
 const MOODS = [
   { id: 'energized', label: 'energized', emoji: '⚡' },
@@ -28,8 +30,10 @@ const DEFAULT_HABITS = [
 
 export default function TrackPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     cycleDay: '',
@@ -91,35 +95,40 @@ export default function TrackPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setError(null);
     setSaving(true);
 
-    // Save to localStorage
-    const today = new Date().toISOString().split('T')[0];
-    const savedData = {
-      ...formData,
-      date: today,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const savedData = {
+        ...formData,
+        date: today,
+      };
 
-    // Get existing entries
-    const existingEntries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
+      // Save to Supabase
+      if (user) {
+        await trackingService.saveDailyEntry(user.id, savedData);
+      }
 
-    // Remove any existing entry for today and add new one
-    const updatedEntries = existingEntries.filter(entry => entry.date !== today);
-    updatedEntries.push(savedData);
+      // Also save to localStorage as backup
+      const existingEntries = JSON.parse(localStorage.getItem('trackingEntries') || '[]');
+      const updatedEntries = existingEntries.filter(entry => entry.date !== today);
+      updatedEntries.push({ ...savedData, timestamp: new Date().toISOString() });
+      localStorage.setItem('trackingEntries', JSON.stringify(updatedEntries));
+      localStorage.setItem('latestEntry', JSON.stringify(savedData));
 
-    localStorage.setItem('trackingEntries', JSON.stringify(updatedEntries));
-    localStorage.setItem('latestEntry', JSON.stringify(savedData));
+      setSaving(false);
+      setShowSuccess(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setSaving(false);
-    setShowSuccess(true);
-
-    // Show success animation for 2 seconds then navigate
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 2000);
+      // Show success animation for 2 seconds then navigate
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (err) {
+      console.error('Error saving entry:', err);
+      setError(err.message || 'Failed to save entry');
+      setSaving(false);
+    }
   };
 
   const habitsCompleted = Object.values(formData.habits).filter(Boolean).length;
