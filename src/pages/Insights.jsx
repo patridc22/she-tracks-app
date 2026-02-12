@@ -4,6 +4,7 @@ import BottomNav from '@/components/BottomNav';
 
 export default function InsightsPage() {
   const [activeTab, setActiveTab] = useState('patterns');
+  const [hasData, setHasData] = useState(false); // Set to true once user has tracked data
 
   return (
     <div className="min-h-screen bg-cream pb-24">
@@ -55,6 +56,19 @@ export default function InsightsPage() {
         {/* Patterns Tab */}
         {activeTab === 'patterns' && (
           <div className="space-y-4">
+            {!hasData ? (
+              <Card variant="soft">
+                <div className="text-center py-8">
+                  <div className="text-6xl mb-4">📊</div>
+                  <h3 className="text-xl font-serif text-deep mb-3">No Patterns Yet</h3>
+                  <p className="text-sm text-muted font-light leading-relaxed max-w-md mx-auto">
+                    Start tracking your daily moods, habits, and cycle to unlock AI-powered insights.
+                    Patterns will appear after a few days of consistent logging.
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <>
             <Card variant="gradient">
               <Badge variant="ai" className="mb-3">
                 ✦ WEEKLY PATTERN
