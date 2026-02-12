@@ -47,6 +47,30 @@ export default function CyclePage() {
   const currentPhase = cycleSetUp ? 'Ovulation' : null;
   const nextPeriod = cycleSetUp ? 'Feb 26' : null;
 
+  // Calculate moon phase
+  const getMoonPhase = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+
+    // Simple moon phase calculation (approximate)
+    const c = Math.floor((year - 1900) / 100);
+    const e = (c - Math.floor(c / 4) - Math.floor((8 * c + 13) / 25) + 19 * year % 19) % 30;
+    const phase = ((e + (11 * month) + day) % 30) / 30;
+
+    if (phase < 0.125) return { name: 'New Moon', emoji: '🌑' };
+    if (phase < 0.25) return { name: 'Waxing Crescent', emoji: '🌒' };
+    if (phase < 0.375) return { name: 'First Quarter', emoji: '🌓' };
+    if (phase < 0.5) return { name: 'Waxing Gibbous', emoji: '🌔' };
+    if (phase < 0.625) return { name: 'Full Moon', emoji: '🌕' };
+    if (phase < 0.75) return { name: 'Waning Gibbous', emoji: '🌖' };
+    if (phase < 0.875) return { name: 'Last Quarter', emoji: '🌗' };
+    return { name: 'Waning Crescent', emoji: '🌘' };
+  };
+
+  const moonPhase = getMoonPhase();
+
   const handleSetupSubmit = (e) => {
     e.preventDefault();
     setCycleSetUp(true);
@@ -111,41 +135,55 @@ export default function CyclePage() {
                 </Button>
               ) : (
                 <form onSubmit={handleSetupSubmit} className="space-y-4 text-left mt-6">
-                  <Input
-                    label="When did your last period start?"
-                    type="date"
-                    value={setupData.lastPeriodDate}
-                    onChange={(e) =>
-                      setSetupData({ ...setupData, lastPeriodDate: e.target.value })
-                    }
-                    required
-                    className="bg-white/10 border-white/20 text-white"
-                  />
+                  <div>
+                    <label className="text-xs font-medium text-white/90 uppercase tracking-wide mb-2 block">
+                      When did your last period start?
+                    </label>
+                    <input
+                      type="date"
+                      value={setupData.lastPeriodDate}
+                      onChange={(e) =>
+                        setSetupData({ ...setupData, lastPeriodDate: e.target.value })
+                      }
+                      required
+                      className="w-full px-4 py-3 rounded-button border-2 border-white/30 bg-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white"
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Cycle length (days)"
-                      type="number"
-                      value={setupData.cycleLength}
-                      onChange={(e) =>
-                        setSetupData({ ...setupData, cycleLength: e.target.value })
-                      }
-                      min="21"
-                      max="35"
-                      required
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                    <Input
-                      label="Period length (days)"
-                      type="number"
-                      value={setupData.periodLength}
-                      onChange={(e) =>
-                        setSetupData({ ...setupData, periodLength: e.target.value })
-                      }
-                      min="3"
-                      max="7"
-                      required
-                      className="bg-white/10 border-white/20 text-white"
-                    />
+                    <div>
+                      <label className="text-xs font-medium text-white/90 uppercase tracking-wide mb-2 block">
+                        Cycle length
+                      </label>
+                      <input
+                        type="number"
+                        value={setupData.cycleLength}
+                        onChange={(e) =>
+                          setSetupData({ ...setupData, cycleLength: e.target.value })
+                        }
+                        min="21"
+                        max="35"
+                        required
+                        className="w-full px-4 py-3 rounded-button border-2 border-white/30 bg-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white"
+                        placeholder="28"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-white/90 uppercase tracking-wide mb-2 block">
+                        Period length
+                      </label>
+                      <input
+                        type="number"
+                        value={setupData.periodLength}
+                        onChange={(e) =>
+                          setSetupData({ ...setupData, periodLength: e.target.value })
+                        }
+                        min="3"
+                        max="7"
+                        required
+                        className="w-full px-4 py-3 rounded-button border-2 border-white/30 bg-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white"
+                        placeholder="5"
+                      />
+                    </div>
                   </div>
                   <Button type="submit" className="w-full bg-white text-rose hover:bg-white/90">
                     Start Tracking
@@ -175,6 +213,20 @@ export default function CyclePage() {
             </div>
           </Card>
         )}
+
+        {/* Moon Phase */}
+        <Card>
+          <h2 className="text-xl font-serif text-deep mb-4">Current Moon Phase</h2>
+          <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-deep/5 to-mauve/5 rounded-button">
+            <div className="text-6xl">{moonPhase.emoji}</div>
+            <div>
+              <h3 className="text-lg font-serif text-deep mb-1">{moonPhase.name}</h3>
+              <p className="text-sm text-muted font-light">
+                The moon's cycle can influence your energy and emotions, just like your menstrual cycle.
+              </p>
+            </div>
+          </div>
+        </Card>
 
         {/* 28-Day Calendar - Only show if cycle is set up */}
         {cycleSetUp && (
