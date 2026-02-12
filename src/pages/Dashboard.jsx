@@ -226,7 +226,12 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="bg-gradient-to-br from-[#F5EDE6] via-[#E8D5CE] to-[#D4A89F] px-6 pt-8 pb-12 mb-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-sm text-muted mb-1">{today}</p>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-serif text-deep">
+              Her <span className="italic text-rose">Daily</span>
+            </h2>
+            <p className="text-sm text-muted">{today}</p>
+          </div>
           <h1 className="text-3xl font-serif text-deep mb-2">
             Hey <span className="italic text-rose">{username}</span>, how are you doing today?
           </h1>
