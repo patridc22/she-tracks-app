@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button, Card, Input, Textarea, Badge } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
 import { trackingService } from '@/services/trackingService';
+import { summaryService } from '@/services/summaryService';
 
 const MOODS = [
   { id: 'energized', label: 'energized', emoji: '⚡' },
@@ -33,6 +34,7 @@ export default function TrackPage() {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -117,13 +119,17 @@ export default function TrackPage() {
       localStorage.setItem('trackingEntries', JSON.stringify(updatedEntries));
       localStorage.setItem('latestEntry', JSON.stringify(savedData));
 
+      // Generate summary
+      const summaryResult = await summaryService.generateSummary(savedData);
+      setSummary(summaryResult.summary);
+
       setSaving(false);
       setShowSuccess(true);
 
-      // Show success animation for 2 seconds then navigate
+      // Show success animation for 3 seconds then navigate
       setTimeout(() => {
         navigate('/dashboard');
-      }, 2000);
+      }, 3000);
     } catch (err) {
       console.error('Error saving entry:', err);
       setError(err.message || 'Failed to save entry');
@@ -138,17 +144,29 @@ export default function TrackPage() {
     <div className="min-h-screen bg-cream pb-24 relative">
       {/* Success Sparkle Overlay */}
       {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-deep/20 backdrop-blur-sm animate-fadeIn">
-          <div className="text-center animate-scaleIn">
-            <div className="text-8xl mb-4 animate-bounce">✨</div>
-            <h2 className="text-3xl font-serif text-deep mb-2">Amazing!</h2>
-            <p className="text-lg text-muted">Your day has been saved</p>
-            <div className="flex gap-4 justify-center mt-4 text-4xl">
-              <span className="animate-pulse">🌸</span>
-              <span className="animate-pulse delay-100">✨</span>
-              <span className="animate-pulse delay-200">💫</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-deep/20 backdrop-blur-sm animate-fadeIn p-6">
+          <Card className="max-w-lg animate-scaleIn">
+            <div className="text-center">
+              <div className="text-6xl mb-4 animate-bounce">✨</div>
+              <h2 className="text-2xl font-serif text-deep mb-3">Amazing!</h2>
+
+              {summary && (
+                <div className="bg-gradient-to-br from-rose/10 to-mauve/10 rounded-button p-4 mb-4">
+                  <p className="text-sm text-deep font-light leading-relaxed">
+                    {summary}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-sm text-muted mb-4">Your day has been saved</p>
+
+              <div className="flex gap-4 justify-center text-3xl">
+                <span className="animate-pulse">🌸</span>
+                <span className="animate-pulse delay-100">✨</span>
+                <span className="animate-pulse delay-200">💫</span>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
       {/* Header */}
