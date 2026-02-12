@@ -252,6 +252,92 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* Wins Section */}
+        {stats.streak > 0 && (
+          <Card variant="gradient">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-2xl">🏆</span>
+              <h2 className="text-xl font-serif text-white">Your Wins</h2>
+            </div>
+            <div className="space-y-3">
+              {stats.streak >= 3 && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-button">
+                  <span className="text-2xl">🔥</span>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">
+                      {stats.streak} day streak!
+                    </p>
+                    <p className="text-white/80 text-sm font-light">
+                      {stats.streak >= 7
+                        ? "You're on fire! Keep the momentum going."
+                        : "Amazing consistency! You're building a powerful habit."}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {stats.journalCount >= 3 && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-button">
+                  <span className="text-2xl">✍️</span>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">
+                      {stats.journalCount} journal entries
+                    </p>
+                    <p className="text-white/80 text-sm font-light">
+                      You're creating a beautiful record of your journey.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {stats.moodPositive >= 50 && allEntries.length >= 5 && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-button">
+                  <span className="text-2xl">😌</span>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">
+                      {stats.moodPositive}% positive vibes
+                    </p>
+                    <p className="text-white/80 text-sm font-light">
+                      You're cultivating more joy in your life.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {stats.habitsCompleted >= 60 && allEntries.length >= 5 && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-button">
+                  <span className="text-2xl">✨</span>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">
+                      {stats.habitsCompleted}% habits tracked
+                    </p>
+                    <p className="text-white/80 text-sm font-light">
+                      Self-care champion! You're prioritizing your wellbeing.
+                    </p>
+                  </div>
+                </div>
+              )}
+              {allEntries.length >= 1 && stats.streak === 1 && (
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-button">
+                  <span className="text-2xl">🌸</span>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">
+                      You're getting started!
+                    </p>
+                    <p className="text-white/80 text-sm font-light">
+                      Every journey begins with a single step. Keep going!
+                    </p>
+                  </div>
+                </div>
+              )}
+              {allEntries.length === 0 && (
+                <div className="text-center py-4">
+                  <p className="text-white/90 font-light">
+                    Start tracking to unlock your wins and celebrate your progress! 🎉
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Cycle Wheel */}
         <Card>
           <div className="flex items-center justify-between mb-4">
