@@ -35,17 +35,84 @@ const PHASES = [
 
 export default function CyclePage() {
   // Track if user has set up their cycle
-  const [cycleSetUp, setCycleSetUp] = useState(false);
+  const [cycleSetUp, setCycleSetUp] = useState(() => {
+    const saved = localStorage.getItem('cycleSetup');
+    return saved ? JSON.parse(saved).isSetUp : false;
+  });
   const [showSetupForm, setShowSetupForm] = useState(false);
-  const [setupData, setSetupData] = useState({
-    lastPeriodDate: '',
-    cycleLength: 28,
-    periodLength: 5,
+  const [setupData, setSetupData] = useState(() => {
+    const saved = localStorage.getItem('cycleSetup');
+    return saved ? JSON.parse(saved) : {
+      lastPeriodDate: '',
+      cycleLength: 28,
+      periodLength: 5,
+    };
   });
 
-  const currentDay = cycleSetUp ? 14 : 0;
-  const currentPhase = cycleSetUp ? 'Ovulation' : null;
-  const nextPeriod = cycleSetUp ? 'Feb 26' : null;
+  // Calculate current cycle day and phase
+  const calculateCycleInfo = () => {
+    if (!cycleSetUp || !setupData.lastPeriodDate) {
+      return { currentDay: 0, currentPhase: null, nextPeriod: null };
+    }
+
+    const lastPeriod = new Date(setupData.lastPeriodDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    lastPeriod.setHours(0, 0, 0, 0);
+
+    // Calculate days since last period
+    const daysSinceLastPeriod = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24));
+
+    // Calculate current day in cycle (1-28+)
+    const cycleLength = parseInt(setupData.cycleLength) || 28;
+    const currentDay = (daysSinceLastPeriod % cycleLength) + 1;
+
+    // Determine phase based on current day
+    const periodLength = parseInt(setupData.periodLength) || 5;
+    let currentPhase = '';
+
+    if (currentDay <= periodLength) {
+      currentPhase = 'Menstruation';
+    } else if (currentDay <= 13) {
+      currentPhase = 'Follicular';
+    } else if (currentDay <= 16) {
+      currentPhase = 'Ovulation';
+    } else {
+      currentPhase = 'Luteal';
+    }
+
+    // Calculate next period date
+    const daysUntilNextPeriod = cycleLength - (daysSinceLastPeriod % cycleLength);
+    const nextPeriodDate = new Date(today);
+    nextPeriodDate.setDate(today.getDate() + daysUntilNextPeriod);
+    const nextPeriod = nextPeriodDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    return { currentDay, currentPhase, nextPeriod };
+  };
+
+  const { currentDay, currentPhase, nextPeriod } = calculateCycleInfo();
+
+  // Get phase emoji
+  const getPhaseEmoji = (phase) => {
+    const emojis = {
+      'Menstruation': '🩸',
+      'Follicular': '🌱',
+      'Ovulation': '🌕',
+      'Luteal': '🍂',
+    };
+    return emojis[phase] || '🌸';
+  };
+
+  // Get phase description
+  const getPhaseDescription = (phase) => {
+    const descriptions = {
+      'Menstruation': 'Rest and reset. Your body is shedding and renewing. Honor your need for slower pace and self-care.',
+      'Follicular': 'Rising energy and creativity. You may feel more social, optimistic, and ready to start new projects.',
+      'Ovulation': 'Peak energy and social connection. This is your power phase — great for important conversations, presentations, and creative projects.',
+      'Luteal': 'Gradual energy decline and introspection. Focus on completing tasks and preparing for rest. Be gentle with yourself.',
+    };
+    return descriptions[phase] || '';
+  };
 
   // Calculate moon phase
   const getMoonPhase = () => {
@@ -73,17 +140,26 @@ export default function CyclePage() {
 
   const handleSetupSubmit = (e) => {
     e.preventDefault();
+    const updatedData = {
+      ...setupData,
+      isSetUp: true
+    };
+    localStorage.setItem('cycleSetup', JSON.stringify(updatedData));
     setCycleSetUp(true);
     setShowSetupForm(false);
   };
 
-  // Mock calendar data
+  // Generate calendar based on actual cycle data
   const generateCalendar = () => {
     const days = [];
-    for (let i = 1; i <= 28; i++) {
+    const cycleLength = parseInt(setupData.cycleLength) || 28;
+    const periodLength = parseInt(setupData.periodLength) || 5;
+
+    for (let i = 1; i <= cycleLength; i++) {
       let phase = '';
       let color = '';
-      if (i <= 5) {
+
+      if (i <= periodLength) {
         phase = 'menstruation';
         color = 'bg-red-200';
       } else if (i <= 13) {
@@ -213,15 +289,14 @@ export default function CyclePage() {
               ✦ CURRENT PHASE
             </Badge>
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-5xl">🌕</span>
+              <span className="text-5xl">{getPhaseEmoji(currentPhase)}</span>
               <div>
                 <h2 className="text-2xl font-serif text-white mb-1">{currentPhase}</h2>
-                <p className="text-white/90 text-sm">Day {currentDay} of 28</p>
+                <p className="text-white/90 text-sm">Day {currentDay} of {setupData.cycleLength}</p>
               </div>
             </div>
             <p className="text-white/95 font-light leading-relaxed">
-              Peak energy and social connection. This is your power phase — great for important
-              conversations, presentations, and creative projects.
+              {getPhaseDescription(currentPhase)}
             </p>
             <div className="mt-4 pt-4 border-t border-white/20 text-sm text-white/90">
               Next period predicted: <strong>{nextPeriod}</strong>
@@ -243,10 +318,10 @@ export default function CyclePage() {
           </div>
         </Card>
 
-        {/* 28-Day Calendar - Only show if cycle is set up */}
+        {/* Calendar - Only show if cycle is set up */}
         {cycleSetUp && (
           <Card>
-            <h2 className="text-xl font-serif text-deep mb-4">28-Day Overview</h2>
+            <h2 className="text-xl font-serif text-deep mb-4">{setupData.cycleLength}-Day Overview</h2>
             <div className="grid grid-cols-7 gap-2">
               {calendarDays.map((day) => (
                 <div
