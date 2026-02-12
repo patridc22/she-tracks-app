@@ -41,7 +41,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🌸</div>
           <h1 className="text-3xl font-serif text-deep mb-2">
-            Welcome to <span className="italic text-rose">She Tracks</span>
+            Welcome to <span className="italic text-rose">Her Daily</span>
           </h1>
           <p className="text-sm text-muted">Create your account to get started</p>
         </div>

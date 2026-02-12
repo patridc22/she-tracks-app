@@ -109,7 +109,7 @@ export default function MePage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `she-tracks-data-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `her-daily-data-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -337,7 +337,7 @@ export default function MePage() {
 
         {/* Version */}
         <div className="text-center">
-          <p className="text-xs text-muted">She Tracks v1.0.0</p>
+          <p className="text-xs text-muted">Her Daily v1.0.0</p>
           <p className="text-xs text-muted mt-1">Made with 🌸 for your wellbeing</p>
         </div>
       </div>

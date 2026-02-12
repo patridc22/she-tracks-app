@@ -22,7 +22,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-serif text-deep mb-3">Your Data is Private</h2>
               <p className="text-text mb-3">
-                She Tracks is designed with your privacy as the foundation. All your data —
+                Her Daily is designed with your privacy as the foundation. All your data —
                 including cycle logs, moods, journal entries, and habits — is stored securely and
                 privately in your personal account.
               </p>
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-serif text-deep mb-3">Contact</h2>
               <p className="text-text">
-                For privacy questions or concerns, please contact us at privacy@shetracks.app
+                For privacy questions or concerns, please contact us at privacy@herdaily.app
               </p>
             </section>
           </div>

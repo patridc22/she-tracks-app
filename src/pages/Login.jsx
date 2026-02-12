@@ -36,7 +36,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🌸</div>
           <h1 className="text-3xl font-serif text-deep mb-2">
-            Welcome back to <span className="italic text-rose">She Tracks</span>
+            Welcome back to <span className="italic text-rose">Her Daily</span>
           </h1>
           <p className="text-sm text-muted">Sign in to continue your journey</p>
         </div>

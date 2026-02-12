@@ -16,7 +16,7 @@ export default function LandingPage() {
               🌸
             </div>
             <h1 className="text-3xl font-serif font-light text-deep">
-              She <span className="italic text-rose">Tracks</span>
+              Her <span className="italic text-rose">Daily</span>
             </h1>
           </div>
           <Link to="/login">
@@ -88,11 +88,11 @@ export default function LandingPage() {
               System Status
             </Link>
             <span>·</span>
-            <a href="mailto:hello@shetracks.app" className="hover:text-rose transition-colors">
+            <a href="mailto:hello@herdaily.app" className="hover:text-rose transition-colors">
               Contact
             </a>
           </div>
-          <p className="text-xs text-muted">© 2026 She Tracks. Made with 🌸 for your wellbeing.</p>
+          <p className="text-xs text-muted">© 2026 Her Daily. Made with 🌸 for your wellbeing.</p>
         </footer>
       </div>
     </div>

@@ -48,7 +48,7 @@ export default function OnboardingGoalsPage() {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-4xl font-serif text-deep mb-3">
-            What brings you to <span className="italic text-rose">She Tracks?</span>
+            What brings you to <span className="italic text-rose">Her Daily?</span>
           </h1>
           <p className="text-muted">Select all that resonate with you</p>
         </div>
