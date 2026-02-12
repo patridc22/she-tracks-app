@@ -120,6 +120,8 @@ export default function InsightsPage() {
                 </p>
               </div>
             </Card>
+            </>
+            )}
           </div>
         )}
 
