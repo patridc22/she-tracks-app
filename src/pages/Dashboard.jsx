@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, Badge, Button } from '@/components/ui';
@@ -5,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [timeView, setTimeView] = useState('daily');
   const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'there';
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -40,13 +42,34 @@ export default function DashboardPage() {
 
           {/* View Toggle */}
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white/90 text-rose rounded-full text-sm font-medium">
+            <button
+              onClick={() => setTimeView('daily')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                timeView === 'daily'
+                  ? 'bg-white/90 text-rose'
+                  : 'bg-white/30 text-deep hover:bg-white/50'
+              }`}
+            >
               Daily
             </button>
-            <button className="px-4 py-2 bg-white/30 text-deep rounded-full text-sm font-medium">
+            <button
+              onClick={() => setTimeView('weekly')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                timeView === 'weekly'
+                  ? 'bg-white/90 text-rose'
+                  : 'bg-white/30 text-deep hover:bg-white/50'
+              }`}
+            >
               Weekly
             </button>
-            <button className="px-4 py-2 bg-white/30 text-deep rounded-full text-sm font-medium">
+            <button
+              onClick={() => setTimeView('monthly')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                timeView === 'monthly'
+                  ? 'bg-white/90 text-rose'
+                  : 'bg-white/30 text-deep hover:bg-white/50'
+              }`}
+            >
               Monthly
             </button>
           </div>
