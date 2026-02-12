@@ -40,21 +40,43 @@ export default function CyclePage() {
     return saved ? JSON.parse(saved).isSetUp : false;
   });
   const [showSetupForm, setShowSetupForm] = useState(false);
+  const [showManualTracking, setShowManualTracking] = useState(false);
   const [setupData, setSetupData] = useState(() => {
     const saved = localStorage.getItem('cycleSetup');
     return saved ? JSON.parse(saved) : {
       lastPeriodDate: '',
       cycleLength: 28,
       periodLength: 5,
+      manualPhase: null,
+      manualDay: null,
     };
   });
 
   // Calculate current cycle day and phase
   const calculateCycleInfo = () => {
     if (!cycleSetUp || !setupData.lastPeriodDate) {
-      return { currentDay: 0, currentPhase: null, nextPeriod: null };
+      return { currentDay: 0, currentPhase: null, nextPeriod: null, isManual: false };
     }
 
+    // Use manual overrides if set
+    if (setupData.manualPhase && setupData.manualDay) {
+      const cycleLength = parseInt(setupData.cycleLength) || 28;
+      const currentDay = parseInt(setupData.manualDay);
+      const daysUntilNextPeriod = cycleLength - currentDay + 1;
+      const today = new Date();
+      const nextPeriodDate = new Date(today);
+      nextPeriodDate.setDate(today.getDate() + daysUntilNextPeriod);
+      const nextPeriod = nextPeriodDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      return {
+        currentDay,
+        currentPhase: setupData.manualPhase,
+        nextPeriod,
+        isManual: true
+      };
+    }
+
+    // Auto-calculate from last period date
     const lastPeriod = new Date(setupData.lastPeriodDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -87,10 +109,21 @@ export default function CyclePage() {
     nextPeriodDate.setDate(today.getDate() + daysUntilNextPeriod);
     const nextPeriod = nextPeriodDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    return { currentDay, currentPhase, nextPeriod };
+    return { currentDay, currentPhase, nextPeriod, isManual: false };
   };
 
-  const { currentDay, currentPhase, nextPeriod } = calculateCycleInfo();
+  const { currentDay, currentPhase, nextPeriod, isManual } = calculateCycleInfo();
+
+  const handleManualUpdate = (e) => {
+    e.preventDefault();
+    const updatedData = {
+      ...setupData,
+      isSetUp: true
+    };
+    localStorage.setItem('cycleSetup', JSON.stringify(updatedData));
+    setSetupData(updatedData);
+    setShowManualTracking(false);
+  };
 
   // Get phase emoji
   const getPhaseEmoji = (phase) => {
@@ -285,9 +318,16 @@ export default function CyclePage() {
           </Card>
         ) : (
           <Card variant="gradient">
-            <Badge variant="ai" className="mb-3">
-              ✦ CURRENT PHASE
-            </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <Badge variant="ai">
+                ✦ CURRENT PHASE
+              </Badge>
+              {isManual && (
+                <Badge variant="neutral" className="bg-white/20 text-white text-[10px]">
+                  Manually adjusted
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-5xl">{getPhaseEmoji(currentPhase)}</span>
               <div>
@@ -301,6 +341,76 @@ export default function CyclePage() {
             <div className="mt-4 pt-4 border-t border-white/20 text-sm text-white/90">
               Next period predicted: <strong>{nextPeriod}</strong>
             </div>
+          </Card>
+        )}
+
+        {/* Manual Tracking Adjustment */}
+        {cycleSetUp && !showSetupForm && (
+          <Card variant="soft">
+            {!showManualTracking ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted mb-3">
+                  Not looking accurate? Adjust your cycle manually based on what's happening with your body.
+                </p>
+                <button
+                  onClick={() => setShowManualTracking(true)}
+                  className="text-sm text-rose font-medium hover:underline"
+                >
+                  Adjust manually →
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleManualUpdate} className="space-y-4">
+                <h3 className="font-serif text-lg text-deep mb-3">Update Your Current Cycle</h3>
+                <div>
+                  <label className="text-xs font-medium text-muted uppercase tracking-wide mb-2 block">
+                    What phase are you in right now?
+                  </label>
+                  <select
+                    value={setupData.manualPhase || ''}
+                    onChange={(e) => setSetupData({ ...setupData, manualPhase: e.target.value })}
+                    required
+                    className="w-full px-4 py-3 rounded-button border border-deep/20 bg-white text-deep focus:outline-none focus:ring-2 focus:ring-rose/50"
+                  >
+                    <option value="">Select your current phase</option>
+                    <option value="Menstruation">🩸 Menstruation</option>
+                    <option value="Follicular">🌱 Follicular</option>
+                    <option value="Ovulation">🌕 Ovulation</option>
+                    <option value="Luteal">🍂 Luteal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted uppercase tracking-wide mb-2 block">
+                    What day of your cycle are you on?
+                  </label>
+                  <input
+                    type="number"
+                    value={setupData.manualDay || ''}
+                    onChange={(e) => setSetupData({ ...setupData, manualDay: e.target.value })}
+                    min="1"
+                    max={setupData.cycleLength}
+                    required
+                    placeholder={`1-${setupData.cycleLength}`}
+                    className="w-full px-4 py-3 rounded-button border border-deep/20 bg-white text-deep placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-rose/50"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowManualTracking(false);
+                      setSetupData({ ...setupData, manualPhase: null, manualDay: null });
+                    }}
+                    className="flex-1 bg-deep/10 text-deep hover:bg-deep/20"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1 bg-rose text-white hover:bg-rose/90">
+                    Save
+                  </Button>
+                </div>
+              </form>
+            )}
           </Card>
         )}
 
